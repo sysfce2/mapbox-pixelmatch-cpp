@@ -18,19 +18,34 @@
 
 static std::vector<unsigned char> readPNG(const char* name, unsigned long& w, unsigned long& h) {
     std::ifstream f(std::string("test/fixtures/") + name + ".png", std::ios::binary);
-    if (!f.good()) { std::cerr << "cannot open " << name << "\n"; std::exit(2); }
+    if (!f.good()) {
+        std::cerr << "cannot open " << name << "\n";
+        std::exit(2);
+    }
     std::vector<unsigned char> buf{std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()};
     std::vector<unsigned char> img;
-    if (decodePNG(img, w, h, buf.data(), buf.size()) != 0) { std::cerr << "decode failed\n"; std::exit(2); }
+    if (decodePNG(img, w, h, buf.data(), buf.size()) != 0) {
+        std::cerr << "decode failed\n";
+        std::exit(2);
+    }
     return img;
 }
 
-struct Case { const char* a; const char* b; double threshold; };
+struct Case {
+    const char* a;
+    const char* b;
+    double threshold;
+};
 
 int main() {
     static const Case cases[] = {
-        {"1a", "1b", 0.05}, {"2a", "2b", 0.05}, {"3a", "3b", 0.05}, {"4a", "4b", 0.05},
-        {"5a", "5b", 0.05}, {"6a", "6b", 0.05}, {"7a", "7b", 0.1},
+        {"1a", "1b", 0.05},
+        {"2a", "2b", 0.05},
+        {"3a", "3b", 0.05},
+        {"4a", "4b", 0.05},
+        {"5a", "5b", 0.05},
+        {"6a", "6b", 0.05},
+        {"7a", "7b", 0.1},
     };
 
     using clock = std::chrono::steady_clock;
@@ -54,8 +69,8 @@ int main() {
             if (ms >= 100.0 || iters >= 1 << 20) {
                 double per = ms / iters;
                 totalMs += per;
-                std::cout << c.a << " vs " << c.b << " (" << w << "x" << h << "): "
-                          << per << " ms/run (" << iters << " iters)\n";
+                std::cout << c.a << " vs " << c.b << " (" << w << "x" << h << "): " << per << " ms/run (" << iters
+                          << " iters)\n";
                 break;
             }
             iters *= 2;

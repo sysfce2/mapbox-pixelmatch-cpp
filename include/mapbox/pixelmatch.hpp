@@ -1,25 +1,31 @@
 #ifndef PIXELMATCH_HPP
 #define PIXELMATCH_HPP
 
-#include <cstdint>
-#include <cstddef>
-#include <cstring>
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 
 namespace mapbox {
 
 namespace detail {
 
-inline double rgb2y(double r, double g, double b) { return r * 0.29889531 + g * 0.58662247 + b * 0.11448223; }
-inline double rgb2i(double r, double g, double b) { return r * 0.59597799 - g * 0.27417610 - b * 0.32180189; }
-inline double rgb2q(double r, double g, double b) { return r * 0.21147017 - g * 0.52261711 + b * 0.31114694; }
+inline double rgb2y(double r, double g, double b) {
+    return r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
+}
+inline double rgb2i(double r, double g, double b) {
+    return r * 0.59597799 - g * 0.27417610 - b * 0.32180189;
+}
+inline double rgb2q(double r, double g, double b) {
+    return r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
+}
 
 // Squared YIQ distance between two pixels; semi-transparent pixels are blended against white.
 // Based on "Measuring perceived color difference using YIQ NTSC transmission color space
 // in mobile applications" by Y. Kotsarenko and F. Ramos.
 inline double colorDelta(const uint8_t* img1, const uint8_t* img2, std::size_t k, std::size_t m, bool yOnly = false) {
-    int r1 = img1[k],     g1 = img1[k + 1], b1 = img1[k + 2], a1 = img1[k + 3];
-    int r2 = img2[m],     g2 = img2[m + 1], b2 = img2[m + 2], a2 = img2[m + 3];
+    int r1 = img1[k], g1 = img1[k + 1], b1 = img1[k + 2], a1 = img1[k + 3];
+    int r2 = img2[m], g2 = img2[m + 1], b2 = img2[m + 2], a2 = img2[m + 3];
 
     int dri = r1 - r2, dgi = g1 - g2, dbi = b1 - b2, da = a1 - a2;
 
@@ -40,7 +46,7 @@ inline double colorDelta(const uint8_t* img1, const uint8_t* img2, std::size_t k
 }
 
 inline void drawPixel(uint8_t* output, std::size_t pos, uint8_t r, uint8_t g, uint8_t b) {
-    output[pos]     = r;
+    output[pos] = r;
     output[pos + 1] = g;
     output[pos + 2] = b;
     output[pos + 3] = 255;
@@ -54,8 +60,8 @@ inline void drawGrayPixel(const uint8_t* img, std::size_t i, uint8_t* output, st
 }
 
 // Check if a pixel has 3+ adjacent pixels of the same RGBA value.
-inline bool hasManySiblings(const uint8_t* img, std::size_t stride, std::size_t x1, std::size_t y1,
-                            std::size_t width, std::size_t height) {
+inline bool hasManySiblings(
+    const uint8_t* img, std::size_t stride, std::size_t x1, std::size_t y1, std::size_t width, std::size_t height) {
     std::size_t x0 = x1 > 0 ? x1 - 1 : 0;
     std::size_t y0 = y1 > 0 ? y1 - 1 : 0;
     std::size_t x2 = std::min(x1 + 1, width - 1);
@@ -76,10 +82,16 @@ inline bool hasManySiblings(const uint8_t* img, std::size_t stride, std::size_t 
 
 // Check if a pixel is likely a part of anti-aliasing.
 // Based on "Anti-aliased Pixel and Intensity Slope Detector" paper by V. Vysniauskas, 2009.
-inline bool antialiased(const uint8_t* img, std::size_t stride,
-                        std::size_t x1, std::size_t y1, std::size_t width, std::size_t height,
-                        const uint8_t* img1, std::size_t stride1,
-                        const uint8_t* img2, std::size_t stride2) {
+inline bool antialiased(const uint8_t* img,
+                        std::size_t stride,
+                        std::size_t x1,
+                        std::size_t y1,
+                        std::size_t width,
+                        std::size_t height,
+                        const uint8_t* img1,
+                        std::size_t stride1,
+                        const uint8_t* img2,
+                        std::size_t stride2) {
     std::size_t x0 = x1 > 0 ? x1 - 1 : 0;
     std::size_t y0 = y1 > 0 ? y1 - 1 : 0;
     std::size_t x2 = std::min(x1 + 1, width - 1);
@@ -96,9 +108,13 @@ inline bool antialiased(const uint8_t* img, std::size_t stride,
             if (delta == 0) {
                 if (++zeroes > 2) return false;
             } else if (delta < minD) {
-                minD = delta; minX = x; minY = y;
+                minD = delta;
+                minX = x;
+                minY = y;
             } else if (delta > maxD) {
-                maxD = delta; maxX = x; maxY = y;
+                maxD = delta;
+                maxX = x;
+                maxY = y;
             }
         }
     }
@@ -114,7 +130,7 @@ inline bool antialiased(const uint8_t* img, std::size_t stride,
             hasManySiblings(img2, stride2, maxX, maxY, width, height));
 }
 
-}
+} // namespace detail
 
 inline uint64_t pixelmatch(const uint8_t* img1,
                            std::size_t stride1,
@@ -124,8 +140,7 @@ inline uint64_t pixelmatch(const uint8_t* img1,
                            std::size_t height,
                            uint8_t* output = nullptr,
                            double threshold = 0.1,
-                           bool includeAA = false)
-{
+                           bool includeAA = false) {
     using namespace detail;
 
     // fast path for identical images
@@ -157,13 +172,11 @@ inline uint64_t pixelmatch(const uint8_t* img1,
             std::size_t pos2 = y * stride2 + x * 4;
             std::size_t posOut = (y * width + x) * 4;
 
-            double delta = std::memcmp(img1 + pos1, img2 + pos2, 4) == 0
-                ? 0 : colorDelta(img1, img2, pos1, pos2);
+            double delta = std::memcmp(img1 + pos1, img2 + pos2, 4) == 0 ? 0 : colorDelta(img1, img2, pos1, pos2);
 
             if (delta > maxDelta) {
-                if (!includeAA &&
-                    (antialiased(img1, stride1, x, y, width, height, img1, stride1, img2, stride2) ||
-                     antialiased(img2, stride2, x, y, width, height, img1, stride1, img2, stride2))) {
+                if (!includeAA && (antialiased(img1, stride1, x, y, width, height, img1, stride1, img2, stride2) ||
+                                   antialiased(img2, stride2, x, y, width, height, img1, stride1, img2, stride2))) {
                     if (output) drawPixel(output, posOut, 255, 255, 0);
                 } else {
                     if (output) drawPixel(output, posOut, 255, 0, 0);
@@ -184,11 +197,10 @@ inline uint64_t pixelmatch(const uint8_t* img1,
                            std::size_t height,
                            uint8_t* output = nullptr,
                            double threshold = 0.1,
-                           bool includeAA = false)
-{
+                           bool includeAA = false) {
     return pixelmatch(img1, width * 4, img2, width * 4, width, height, output, threshold, includeAA);
 }
 
-}
+} // namespace mapbox
 
 #endif

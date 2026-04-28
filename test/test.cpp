@@ -16,12 +16,13 @@
 
 static int failures = 0;
 
-#define CHECK(cond) do { \
-    if (!(cond)) { \
-        std::cerr << "  FAIL: " #cond " (" << __FILE__ << ":" << __LINE__ << ")\n"; \
-        failures++; \
-    } \
-} while (0)
+#define CHECK(cond)                                                                     \
+    do {                                                                                \
+        if (!(cond)) {                                                                  \
+            std::cerr << "  FAIL: " #cond " (" << __FILE__ << ":" << __LINE__ << ")\n"; \
+            failures++;                                                                 \
+        }                                                                               \
+    } while (0)
 
 static std::vector<unsigned char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::binary);
@@ -29,9 +30,7 @@ static std::vector<unsigned char> readFile(const std::string& filename) {
         std::cerr << "cannot open " << filename << "\n";
         std::exit(2);
     }
-    return std::vector<unsigned char>(
-        std::istreambuf_iterator<char>(file),
-        std::istreambuf_iterator<char>());
+    return std::vector<unsigned char>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 }
 
 static std::vector<unsigned char> readPNG(const char* name, unsigned long& width, unsigned long& height) {
@@ -51,8 +50,8 @@ static void diffTest(const char* imgPath1,
                      double threshold,
                      bool includeAA,
                      uint64_t expectedMismatch) {
-    std::cout << "comparing " << imgPath1 << " to " << imgPath2
-              << ", threshold: " << threshold << ", includeAA: " << includeAA << "\n";
+    std::cout << "comparing " << imgPath1 << " to " << imgPath2 << ", threshold: " << threshold
+              << ", includeAA: " << includeAA << "\n";
 
     unsigned long w1, h1, w2, h2;
     auto img1 = readPNG(imgPath1, w1, h1);
@@ -60,8 +59,7 @@ static void diffTest(const char* imgPath1,
     CHECK(w1 == w2 && h1 == h2);
 
     std::vector<unsigned char> actualDiff(w1 * h1 * 4);
-    uint64_t mismatch = mapbox::pixelmatch(img1.data(), img2.data(), w1, h1,
-                                           actualDiff.data(), threshold, includeAA);
+    uint64_t mismatch = mapbox::pixelmatch(img1.data(), img2.data(), w1, h1, actualDiff.data(), threshold, includeAA);
 
     if (mismatch != expectedMismatch) {
         std::cerr << "  mismatch: got " << mismatch << ", expected " << expectedMismatch << "\n";
@@ -97,7 +95,7 @@ static const Case cases[] = {
     {"4a", "4b", "4diff", 0.05, false, 36049},
     {"5a", "5b", "5diff", 0.05, false, 0},
     {"6a", "6b", "6diff", 0.05, false, 51},
-    {"7a", "7b", "7diff", 0.1,  false, 2448},
+    {"7a", "7b", "7diff", 0.1, false, 2448},
 };
 
 int main() {
