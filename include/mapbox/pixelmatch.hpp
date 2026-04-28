@@ -101,17 +101,27 @@ inline bool antialiased(const uint8_t* img,
     double minD = 0, maxD = 0;
     std::size_t minX = 0, minY = 0, maxX = 0, maxY = 0;
 
+    // go through 8 adjacent pixels
     for (std::size_t x = x0; x <= x2; x++) {
         for (std::size_t y = y0; y <= y2; y++) {
             if (x == x1 && y == y1) continue;
+
+            // brightness delta between the center pixel and the adjacent one
             double delta = colorDelta(img, img, pos, y * stride + x * 4, true);
+
+            // count the number of equal, darker and brighter adjacent pixels
             if (delta == 0) {
+                // if there are more than 2 equal siblings, it's definitely not anti-aliasing
                 if (++zeroes > 2) return false;
+
             } else if (delta < minD) {
+                // remember the darkest pixel
                 minD = delta;
                 minX = x;
                 minY = y;
+
             } else if (delta > maxD) {
+                // remember the brightest pixel
                 maxD = delta;
                 maxX = x;
                 maxY = y;
@@ -162,27 +172,39 @@ inline uint64_t pixelmatch(const uint8_t* img1,
         return 0;
     }
 
+    // maximum acceptable square distance between two colors;
     // 35215 is the maximum possible value for the YIQ difference metric
     double maxDelta = 35215 * threshold * threshold;
     uint64_t diff = 0;
 
+    // compare each pixel of one image against the other one
     for (std::size_t y = 0; y < height; y++) {
         for (std::size_t x = 0; x < width; x++) {
+            // input images may use different stride padding; the output is tightly packed
             std::size_t pos1 = y * stride1 + x * 4;
             std::size_t pos2 = y * stride2 + x * 4;
             std::size_t posOut = (y * width + x) * 4;
 
+            // squared YIQ distance between colors at this pixel position; skip the math
+            // entirely if the raw RGBA bytes match
             double delta = std::memcmp(img1 + pos1, img2 + pos2, 4) == 0 ? 0 : colorDelta(img1, img2, pos1, pos2);
 
+            // the color difference is above the threshold
             if (delta > maxDelta) {
+                // check if it's a real rendering difference or just anti-aliasing
                 if (!includeAA && (antialiased(img1, stride1, x, y, width, height, img1, stride1, img2, stride2) ||
                                    antialiased(img2, stride2, x, y, width, height, img1, stride1, img2, stride2))) {
+                    // one of the pixels is anti-aliasing; draw as yellow and do not count as a difference
                     if (output) drawPixel(output, posOut, 255, 255, 0);
+
                 } else {
+                    // found substantial difference not caused by anti-aliasing; draw it as red
                     if (output) drawPixel(output, posOut, 255, 0, 0);
                     diff++;
                 }
+
             } else if (output) {
+                // pixels are similar; draw background as grayscale image blended with white
                 drawGrayPixel(img1, pos1, output, posOut);
             }
         }
