@@ -25,6 +25,10 @@ if(PROJECT_IS_TOP_LEVEL)
         COMMAND test_pixelmatch
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
+
+    add_executable(bench_pixelmatch test/bench.cpp)
+    target_link_libraries(bench_pixelmatch PRIVATE pixelmatch)
+    target_compile_options(bench_pixelmatch PRIVATE -Wall -Wextra)
 endif()
 
 include(GNUInstallDirs)
