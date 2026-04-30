@@ -1,35 +1,11 @@
-#include <mapbox/pixelmatch.hpp>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#include "picopng.hpp"
-#pragma GCC diagnostic pop
-
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
-#include <string>
+#include <mapbox/pixelmatch.hpp>
 #include <vector>
 
-static std::vector<unsigned char> readPNG(const char* name, unsigned long& w, unsigned long& h) {
-    std::ifstream f(std::string("test/fixtures/") + name + ".png", std::ios::binary);
-    if (!f.good()) {
-        std::cerr << "cannot open " << name << "\n";
-        std::exit(2);
-    }
-    std::vector<unsigned char> buf{std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()};
-    std::vector<unsigned char> img;
-    if (decodePNG(img, w, h, buf.data(), buf.size()) != 0) {
-        std::cerr << "decode failed\n";
-        std::exit(2);
-    }
-    return img;
-}
+#include "png_decode.hpp"
 
 struct Case {
     const char* a;

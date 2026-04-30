@@ -1,18 +1,11 @@
-#include <mapbox/pixelmatch.hpp>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#include "picopng.hpp"
-#pragma GCC diagnostic pop
-
 #include <cstdint>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <iterator>
+#include <mapbox/pixelmatch.hpp>
 #include <string>
 #include <vector>
+
+#include "png_decode.hpp"
 
 static int failures = 0;
 
@@ -23,26 +16,6 @@ static int failures = 0;
             failures++;                                                                 \
         }                                                                               \
     } while (0)
-
-static std::vector<unsigned char> readFile(const std::string& filename) {
-    std::ifstream file(filename, std::ios::binary);
-    if (!file.good()) {
-        std::cerr << "cannot open " << filename << "\n";
-        std::exit(2);
-    }
-    return std::vector<unsigned char>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-}
-
-static std::vector<unsigned char> readPNG(const char* name, unsigned long& width, unsigned long& height) {
-    auto buffer = readFile(std::string("test/fixtures/") + name + ".png");
-    std::vector<unsigned char> image;
-    int err = decodePNG(image, width, height, buffer.data(), buffer.size());
-    if (err != 0) {
-        std::cerr << "PNG decode error " << err << " for " << name << "\n";
-        std::exit(2);
-    }
-    return image;
-}
 
 static void diffTest(const char* imgPath1,
                      const char* imgPath2,

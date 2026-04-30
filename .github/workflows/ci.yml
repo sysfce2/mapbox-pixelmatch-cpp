@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install libpng
+        run: sudo apt-get update && sudo apt-get install -y libpng-dev
       - name: Check formatting
-        run: clang-format --dry-run --Werror include/mapbox/*.hpp test/test.cpp test/bench.cpp
+        run: clang-format --dry-run --Werror include/mapbox/*.hpp test/test.cpp test/bench.cpp test/png_decode.hpp
       - run: cmake -B build -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build
       - run: ctest --test-dir build --output-on-failure
