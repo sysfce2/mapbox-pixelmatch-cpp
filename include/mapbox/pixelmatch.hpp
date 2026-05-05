@@ -149,7 +149,7 @@ inline uint64_t pixelmatch(const uint8_t* img1,
                            std::size_t width,
                            std::size_t height,
                            uint8_t* output = nullptr,
-                           double threshold = 0.1,
+                           float threshold = 0.1f,
                            bool includeAA = false) {
     using namespace detail;
 
@@ -218,7 +218,7 @@ inline uint64_t pixelmatch(const uint8_t* img1,
                            std::size_t width,
                            std::size_t height,
                            uint8_t* output = nullptr,
-                           double threshold = 0.1,
+                           float threshold = 0.1f,
                            bool includeAA = false) {
     return pixelmatch(img1, width * 4, img2, width * 4, width, height, output, threshold, includeAA);
 }
