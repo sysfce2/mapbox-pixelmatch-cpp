@@ -3,24 +3,17 @@
 #include <png.h>
 
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <iterator>
 #include <string>
 #include <vector>
 
 inline std::vector<unsigned char> readPNG(const char* name, unsigned long& width, unsigned long& height) {
-    std::ifstream file(std::string("test/fixtures/") + name + ".png", std::ios::binary);
-    if (!file.good()) {
-        std::cerr << "cannot open " << name << "\n";
-        std::exit(2);
-    }
-    std::vector<unsigned char> buffer{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    std::string path = std::string("test/fixtures/") + name + ".png";
 
     png_image image{};
     image.version = PNG_IMAGE_VERSION;
 
-    if (!png_image_begin_read_from_memory(&image, buffer.data(), buffer.size())) {
+    if (!png_image_begin_read_from_file(&image, path.c_str())) {
         std::cerr << "PNG read failed for " << name << ": " << image.message << "\n";
         std::exit(2);
     }
